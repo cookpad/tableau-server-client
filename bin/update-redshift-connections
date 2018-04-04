@@ -1,0 +1,82 @@
+#!/usr/bin/ruby
+
+require 'optparse'
+require 'tableau-server-client/server'
+
+# Cache project information to reduce HTTP request
+@projects = {}
+
+@dryrun = false
+@update_count = 0
+
+def main
+  opts = {}
+  opts[:url] = ENV['TABLEAU_SERVER_URL']
+  opts[:username] = ENV['TABLEAU_SERVER_USERNAME']
+  opts[:password] = ENV['TABLEAU_SERVER_PASSWORD']
+  opts[:site] = "Default"
+
+  parser = OptionParser.new do |o|
+    o.banner = "Usage: update-redshift-connections.rb [options]"
+    o.on("-l", "--url [TABLEAU_SERVER_URL]", "Tableau Server's URL") do |url|
+      opts[:url] = url
+    end
+    o.on("-u", "--username [TABLEAU_SERVER_USERNAME]", "User for Tablau Server") do |username|
+      opts[:username] = username
+    end
+    o.on("-p", "--password [TABLEAU_SERVER_PASSWORD]", "Password for Tableau Server user") do |password|
+      opts[:password] = password
+    end
+    o.on("-s", "--site [SITE_NAME]", "Site name on Tableau Server") do |site|
+      opts[:site] = site
+    end
+    o.on("-d", "--dry-run", "Dry run") do
+      @dryrun = true
+    end
+  end
+
+  parser.parse!
+
+  missing = []
+  missing << "url" unless opts[:url]
+  missing << "username" unless opts[:username]
+  missing << "password" unless opts[:password]
+  unless missing.empty?
+    raise "Tableau Server's #{missing.join(", ")} cannot be empty!"
+  end
+
+  server = TableauServerClient::Server.new(opts[:url], opts[:username], opts[:password])
+  site = server.sites.select {|s| s.name == opts[:site] }.first
+  site.datasources.each do |ds|
+    update_redshift_connections(ds)
+  end
+  site.workbooks.each do |wb|
+    update_redshift_connections(wb)
+  end
+  puts "#{@update_count} connections are updated."
+end
+
+def update_redshift_connections(holder)
+  @projects[holder.project.name] ||= holder.project.reload
+  # Read username from project's description
+  # Fortmat: REDSHIFT_USERNAME: hoge
+  username ||= @projects[holder.project.name].redshift_username
+  password_env_name = "#{username}_password".upcase!
+  password = ENV[password_env_name]
+  # Skip when cannot extract username from project or env variable for password is not set
+  return unless username
+  raise "Environment variable #{password_env_name} not found!" unless password
+  holder.connections.each do |conn|
+    next unless conn.type == 'redshift'
+    puts "#{@dryrun ? "(dry-run): " : ""}Set #{username} for #{holder.class.resource_name}=#{holder.name}"
+    conn.user_name = username
+    conn.password = password
+    conn.embed_password = true
+    unless @dryrun
+      conn.update!
+      @update_count += 1
+    end
+  end
+end
+
+main()
