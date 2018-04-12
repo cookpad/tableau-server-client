@@ -1,4 +1,4 @@
-require 'tableau-server-client/resources/resource'
+require 'tableau_server_client/resources/resource'
 
 module TableauServerClient
   module Resources

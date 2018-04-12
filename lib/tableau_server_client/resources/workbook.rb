@@ -1,6 +1,6 @@
-require 'tableau-server-client/resources/resource'
-require 'tableau-server-client/resources/project'
-require 'tableau-server-client/resources/connection'
+require 'tableau_server_client/resources/resource'
+require 'tableau_server_client/resources/project'
+require 'tableau_server_client/resources/connection'
 
 module TableauServerClient
   module Resources

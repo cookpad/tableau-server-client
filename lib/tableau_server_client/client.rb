@@ -1,10 +1,10 @@
 require 'uri'
 require 'faraday'
 require 'nokogiri'
-require 'tableau-server-client/request_url'
-require 'tableau-server-client/request_builder'
-require 'tableau-server-client/token'
-require 'tableau-server-client/paginatable_response'
+require 'tableau_server_client/request_url'
+require 'tableau_server_client/request_builder'
+require 'tableau_server_client/token'
+require 'tableau_server_client/paginatable_response'
 
 module TableauServerClient
 

@@ -1,6 +1,6 @@
-require 'tableau-server-client/client'
-require 'tableau-server-client/resources/site'
-require 'tableau-server-client/resources/schedule'
+require 'tableau_server_client/client'
+require 'tableau_server_client/resources/site'
+require 'tableau_server_client/resources/schedule'
 require 'logger'
 
 module TableauServerClient
