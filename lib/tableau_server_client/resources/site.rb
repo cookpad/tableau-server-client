@@ -1,6 +1,7 @@
 require 'tableau_server_client/resources/resource'
 require 'tableau_server_client/resources/datasource'
 require 'tableau_server_client/resources/workbook'
+require 'tableau_server_client/resources/user'
 
 module TableauServerClient
   module Resources
@@ -35,6 +36,22 @@ module TableauServerClient
 
       def workbook(id)
         @client.get Workbook.location(path, id)
+      end
+
+      def users(filter: [])
+        @client.get_collection User.location(path, filter: filter)
+      end
+
+      def user(id)
+        @client.get User.location(path, id)
+      end
+
+      def projects(filter: [])
+        @client.get_collection Project.location(path, filter: filter)
+      end
+
+      def project(id)
+        projects.find { |p| p.id == id }
       end
 
     end

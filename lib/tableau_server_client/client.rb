@@ -39,7 +39,8 @@ module TableauServerClient
     def get(resource_location)
       req_url = request_url(resource_location.path)
       response = session.get req_url.to_s
-      resource_location.klass.from_response(self, resource_location.path, Nokogiri::XML(response.body))
+      xml =  Nokogiri::XML(response.body).xpath("//xmlns:tsResponse").children.first
+      resource_location.klass.from_response(self, resource_location.path, xml)
     end
 
     def create(resource)

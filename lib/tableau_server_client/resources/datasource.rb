@@ -7,14 +7,13 @@ module TableauServerClient
 
     class Datasource < Resource
 
-      attr_reader :id, :name, :content_url, :type, :created_at, :updated_at, :is_certified, :project, :owner
+      attr_reader :id, :name, :content_url, :type, :created_at, :updated_at, :is_certified
+      attr_writer :owner
 
       def self.from_response(client, path, xml)
         attrs = extract_attributes(xml)
-        project = xml.xpath("xmlns:project")[0]
-        site_path = extract_site_path(path)
-        project_path = "#{site_path}/projects/#{project['id']}"
-        attrs['project'] = Project.from_response(client, project_path, project)
+        attrs['project_id'] = xml.xpath("xmlns:project")[0]['id']
+        attrs['owner_id']   = xml.xpath("xmlns:owner")[0]['id']
         #TODO add owner
         new(client, path, attrs)
       end
@@ -29,6 +28,27 @@ module TableauServerClient
       def connections
         @client.get_collection Connection.location(path)
       end
+
+      def project
+        @project ||= @client.get_collection(Project.location(site_path)).find {|p| p.id == @project_id }
+      end
+
+      def owner
+        @owner ||= @client.get User.location(site_path, @owner_id)
+      end
+
+      def to_request
+        request = build_request {|b|
+          b.datasource {|w|
+            w.owner(id: owner.id)
+          }
+        }
+      end
+
+      def update!
+        @client.update self
+      end
+
 
     end
   end
