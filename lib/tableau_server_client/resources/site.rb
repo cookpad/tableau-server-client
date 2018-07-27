@@ -2,6 +2,7 @@ require 'tableau_server_client/resources/resource'
 require 'tableau_server_client/resources/datasource'
 require 'tableau_server_client/resources/workbook'
 require 'tableau_server_client/resources/user'
+require 'tableau_server_client/resources/subscription'
 
 module TableauServerClient
   module Resources
@@ -52,6 +53,14 @@ module TableauServerClient
 
       def project(id)
         projects.find { |p| p.id == id }
+      end
+
+      def subscriptions
+        @client.get_collection Subscription.location(path)
+      end
+
+      def subscription(id)
+        subscriptions.find {|s| s.id = id }
       end
 
     end

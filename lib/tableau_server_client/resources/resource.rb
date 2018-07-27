@@ -53,6 +53,10 @@ module TableauServerClient
         self.class.extract_site_path(path)
       end
 
+      def delete!
+        @client.delete self
+      end
+
       class Location
 
         def initialize(klass, path, filter)

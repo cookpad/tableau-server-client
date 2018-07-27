@@ -46,14 +46,15 @@ module TableauServerClient
     def create(resource)
     end
 
-    def delete(resource)
-    end
-
     def update(resource)
       session.put do |req|
         req.url request_url(resource.path).to_s
         req.body = resource.to_request
       end
+    end
+
+    def delete(resource)
+      session.delete request_url(resource.path).to_s
     end
 
     def session
