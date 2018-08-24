@@ -18,7 +18,7 @@ module TableauServerClient
       while true
         pgn = Pagination.parse(res.body)
         break unless pgn.next_page?
-        res = @client.session.get url.merge_params!(pgn.request_params).to_s
+        res = @client.session.get url.merge_params!(pgn.next_request_params).to_s
         yield res
       end
     end
@@ -37,7 +37,7 @@ module TableauServerClient
 
     class Pagination
       def initialize(page_number, page_size, total_available)
-        @page_numner = page_number
+        @page_number = page_number
         @page_size = page_size
         @total_available = total_available
       end
@@ -61,10 +61,10 @@ module TableauServerClient
       end
 
       def next_page?
-        page_number * page_size > total_available
+        page_number * page_size < total_available
       end
 
-      def request_params
+      def next_request_params
         { pageSize: page_size, pageNumber: page_number + 1 }
       end
     end
