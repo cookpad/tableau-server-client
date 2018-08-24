@@ -5,6 +5,9 @@ require 'tableau_server_client/request_url'
 require 'tableau_server_client/request_builder'
 require 'tableau_server_client/token'
 require 'tableau_server_client/paginatable_response'
+require 'tempfile'
+require 'zip'
+require 'stringio'
 
 module TableauServerClient
 
@@ -44,6 +47,25 @@ module TableauServerClient
     end
 
     def create(resource)
+    end
+
+    def download(resource_location)
+      req_url = request_url("#{resource_location.path}/content", resource_location.query_params)
+      response = session.get req_url.to_s
+      type, disposition = response.headers.values_at('content-type', 'content-disposition')
+      case type
+      when 'application/xml'
+        return Nokogiri::XML(response.body)
+      when 'application/octet-stream'
+        Zip::InputStream.open(StringIO.new(response.body)) do |io|
+          while entry = io.get_next_entry
+            return Nokogiri::XML(io.read) if entry.name =~ /.*\.(tds|twb)/
+          end
+          raise "TDS or TWB file not found for: #{resource_location.path}"
+        end
+      else
+        raise "Unknown content-type: #{type}"
+      end
     end
 
     def update(resource)

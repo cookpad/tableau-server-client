@@ -26,7 +26,7 @@ module TableauServerClient
 
       def self.location(prefix, id=nil, filter: [])
         path = [prefix, "#{resource_name}s", id].compact.join("/")
-        Location.new(self, path, filter)
+        Location.new(self, path, filter.empty? ? {} : {filter: filter.join(',')})
       end
 
       def self.extract_attributes(xml)
@@ -49,6 +49,10 @@ module TableauServerClient
         @path
       end
 
+      def location(query_params: {})
+        Location.new(self, path, query_params)
+      end
+
       def site_path
         self.class.extract_site_path(path)
       end
@@ -59,21 +63,13 @@ module TableauServerClient
 
       class Location
 
-        def initialize(klass, path, filter)
+        def initialize(klass, path, query_params)
           @klass = klass
           @path = path
-          @filter = filter
+          @query_params = query_params
         end
 
-        attr_reader :klass, :path
-
-        def filter
-          @filter.empty? ? {} : {filter: @filter.join(",")}
-        end
-
-        def query_params
-          filter
-        end
+        attr_reader :klass, :path, :query_params
       end
 
       class Attribute < String
