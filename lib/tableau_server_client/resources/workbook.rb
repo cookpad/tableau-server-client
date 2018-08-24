@@ -89,10 +89,10 @@ module TableauServerClient
 
       def extract_tables(query)
         q = query.dup
-        q.gsub!(/(\<\[Parameters\]\.\[.*?\]\>)/, "'\\1'")\
-          .gsub!(/(--[^\r\n]*)|(\/\*[\w\W]*?(?=\*\/)\*\/)/m, '')\
-          .gsub!(/[\t\r\n]/, ' ')\
-          .gsub!(/\s+/, ' ')
+        q.gsub!(/(\<\[Parameters\]\.\[.*?\]\>)/, "'\\1'")
+        q.gsub!(/(--[^\r\n]*)|(\/\*[\w\W]*?(?=\*\/)\*\/)/m, '')
+        q.gsub!(/[\t\r\n]/, ' ')
+        q.gsub!(/\s+/, ' ')
 
         tables = []
         may_be_table = false
