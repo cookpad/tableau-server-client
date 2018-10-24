@@ -3,6 +3,7 @@ require 'tableau_server_client/resources/datasource'
 require 'tableau_server_client/resources/workbook'
 require 'tableau_server_client/resources/user'
 require 'tableau_server_client/resources/subscription'
+require 'tableau_server_client/resources/extract_refresh'
 
 module TableauServerClient
   module Resources
@@ -61,6 +62,10 @@ module TableauServerClient
 
       def subscription(id)
         subscriptions.find {|s| s.id = id }
+      end
+
+      def extract_refreshes
+        @client.get_collection ExtractRefresh.location("#{path}/tasks")
       end
 
     end

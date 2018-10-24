@@ -21,11 +21,15 @@ module TableauServerClient
       end
 
       def self.resource_name
-        self.name.split("::").last.downcase
+        self.name.split("::").last.sub(/./){ $&.downcase }
+      end
+
+      def self.plural_resource_name
+        "#{self.resource_name}s"
       end
 
       def self.location(prefix, id=nil, filter: [])
-        path = [prefix, "#{resource_name}s", id].compact.join("/")
+        path = [prefix, plural_resource_name, id].compact.join("/")
         Location.new(self, path, filter.empty? ? {} : {filter: filter.join(',')})
       end
 
