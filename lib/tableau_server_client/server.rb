@@ -7,9 +7,10 @@ module TableauServerClient
   class Server
 
     def initialize(server_url, username, password,
-                   site_name: "default", api_version: "2.8", token_lifetime: 240)
+                   site_name: "default", api_version: "3.1", token_lifetime: 240,
+                   log_level: :info)
       @logger = ::Logger.new(STDOUT)
-      @logger.level = ::Logger::INFO
+      @logger.level = ::Logger.const_get(log_level.upcase.to_sym)
       @client = Client.new(server_url, username, password, site_name, api_version, token_lifetime, @logger)
     end
 

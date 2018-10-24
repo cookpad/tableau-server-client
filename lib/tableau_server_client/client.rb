@@ -21,7 +21,7 @@ module TableauServerClient
       @site_name = site_name
       @api_version = api_version
       @token_lifetime = token_lifetime
-      @logger
+      @logger = logger
     end
 
     attr_reader :site_name, :username, :api_version, :token_lifetime, :logger
@@ -124,8 +124,7 @@ module TableauServerClient
     def faraday
       @faraday ||= Faraday.new(request: {params_encoder: EmptyEncoder.new}, headers: {'Content-Type' => 'application/xml'}) do |f|
         f.response :raise_error
-        #TODO Cannot set log level (always print debug log)
-        #f.response :logger, logger
+        f.response :logger, logger
         f.adapter Faraday.default_adapter
       end
     end
