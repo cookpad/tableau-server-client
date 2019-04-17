@@ -1,11 +1,13 @@
 require 'tableau_server_client/resources/resource'
 require 'tableau_server_client/resources/project'
 require 'tableau_server_client/resources/connection'
+require 'tableau_server_client/resources/downloadable'
 
 module TableauServerClient
   module Resources
 
     class Datasource < Resource
+      include Downloadable
 
       attr_reader :id, :name, :content_url, :type, :created_at, :updated_at, :is_certified
       attr_writer :owner
@@ -48,7 +50,6 @@ module TableauServerClient
       def update!
         @client.update self
       end
-
 
     end
   end

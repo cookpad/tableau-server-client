@@ -86,6 +86,12 @@ module TableauServerClient
 
       end
 
+      private
+
+      def client
+        @client
+      end
+
     end
 
   end

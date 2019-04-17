@@ -1,11 +1,13 @@
 require 'tableau_server_client/resources/resource'
 require 'tableau_server_client/resources/project'
 require 'tableau_server_client/resources/connection'
+require 'tableau_server_client/resources/downloadable'
 
 module TableauServerClient
   module Resources
 
     class Workbook < Resource
+      include Downloadable
 
       attr_reader :id, :name, :content_url, :show_tabs, :size, :created_at, :updated_at
       attr_writer :owner
@@ -77,10 +79,6 @@ module TableauServerClient
         download.xpath('//named-connection').map do |c|
           NamedConnection.new(c.first_element_child['class'], c['caption'], c['name'])
         end
-      end
-
-      def download
-        @twb ||= @client.download location(query_params: {"includeExtract": "False"})
       end
 
       def relations

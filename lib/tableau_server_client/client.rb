@@ -56,23 +56,13 @@ module TableauServerClient
       Nokogiri::XML(response.body).xpath("//xmlns:tsResponse").children.first
     end
 
-    def download(resource_location)
+    def download(resource_location, file_path: nil)
       req_url = request_url("#{resource_location.path}/content", resource_location.query_params)
       response = session.get req_url.to_s
-      type, disposition = response.headers.values_at('content-type', 'content-disposition')
-      case type
-      when 'application/xml'
-        return Nokogiri::XML(response.body)
-      when 'application/octet-stream'
-        Zip::InputStream.open(StringIO.new(response.body)) do |io|
-          while entry = io.get_next_entry
-            return Nokogiri::XML(io.read) if entry.name =~ /.*\.(tds|twb)/
-          end
-          raise "TDS or TWB file not found for: #{resource_location.path}"
-        end
-      else
-        raise "Unknown content-type: #{type}"
+      if file_path
+        File.write(file_path, response.body)
       end
+      return response
     end
 
     def update(resource)
