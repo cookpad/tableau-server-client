@@ -2,6 +2,7 @@ require 'tableau_server_client/resources/resource'
 require 'tableau_server_client/resources/project'
 require 'tableau_server_client/resources/connection'
 require 'tableau_server_client/resources/downloadable'
+require 'tableau_server_client/resources/datasource'
 
 module TableauServerClient
   module Resources
@@ -51,64 +52,10 @@ module TableauServerClient
         @client.update self
       end
 
-      def custom_queries
-        relations.select {|r| r['type'] == 'text' }.map {|c| c.content }
-      end
-
-      def tables
-        tables  = []
-        redshift_connections = named_connections.select {|c| c.class == 'redshift' }.map {|c| c.name }
-        relations.each do |rel|
-          next unless redshift_connections.include? rel['connection']
-          case rel['type']
-          when 'table'
-            tables << rel['table']
-          when 'text'
-            tables.concat extract_tables(rel.content)
-          else
-            next
-          end
+      def embedded_datasources
+        download.xpath('//datasources//datasource').each do |ds|
+          Datasource::DatasourceContent.new(ds)
         end
-        tables.map {|t| t.gsub(/[\[\]")]/, '')}.uniq
-      end
-
-      private
-
-      NamedConnection = Struct.new("NamedConnections", :class, :caption, :name)
-      def named_connections
-        download.xpath('//named-connection').map do |c|
-          NamedConnection.new(c.first_element_child['class'], c['caption'], c['name'])
-        end
-      end
-
-      def relations
-        download.xpath('//datasources//datasource//relation')
-      end
-
-      def extract_tables(query)
-        q = query.dup
-        q.gsub!(/(\<\[Parameters\]\.\[.*?\]\>)/, "'\\1'")
-        q.gsub!(/(--[^\r\n]*)|(\/\*[\w\W]*?(?=\*\/)\*\/)/m, '')
-        q.gsub!(/[\t\r\n]/, ' ')
-        q.gsub!(/\s+/, ' ')
-
-        tables = []
-        may_be_table = false
-        q.split(' ').each do |t|
-          t.downcase!
-          if may_be_table
-            tables << t unless t =~ /(^select|^\(.*)/
-            may_be_table = false
-          end
-          if ['from', 'join'].include?(t)
-             may_be_table = true
-          end
-        end
-        tables
-        # ParseError with sub-query without alias name
-        #PgQuery.parse(no_parameter_query).tables.each do |t|
-        #  yield t
-        #end
       end
 
     end
