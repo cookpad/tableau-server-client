@@ -56,7 +56,7 @@ module TableauServerClient
       end
 
       def hierarchy
-        (parent_projects << self).map {|p| p.name }.join('/')
+        @hierarchy ||= (parent_projects << self).map {|p| p.name }.join('/')
       end
 
       def extract_values_in_description
