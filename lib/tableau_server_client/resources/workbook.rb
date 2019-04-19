@@ -53,7 +53,7 @@ module TableauServerClient
       end
 
       def embedded_datasources
-        download.xpath('//datasources//datasource').each do |ds|
+        download.xpath('//datasources//datasource').map do |ds|
           Datasource::DatasourceContent.new(ds)
         end
       end
