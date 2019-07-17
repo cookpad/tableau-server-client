@@ -44,6 +44,14 @@ module TableauServerClient
         @client.get_collection(Resources::Schedule.location(nil)).first {|s| s.id == schedule_id }
       end
 
+      def workbook
+        @client.get_collection(Workbook.location(site_path)).find {|w| w.id == workbook_id }
+      end
+
+      def datasource
+        @client.get_collection(Datasource.location(site_path)).find {|d| d.id == datasource_id }
+      end
+
       def run_now
         resp = @client.create(self, path: "#{path}/runNow", request: build_request {})
         job_id = resp.xpath("//xmlns:job/@id").first.value
