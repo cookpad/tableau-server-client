@@ -41,7 +41,7 @@ module TableauServerClient
       end
 
       def schedule
-        @client.get_collection(Resources::Schedule.location(nil)).first {|s| s.id == schedule_id }
+        @client.get_collection(Resources::Schedule.location(nil)).find {|s| s.id == schedule_id }
       end
 
       def workbook
