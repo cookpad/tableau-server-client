@@ -10,7 +10,7 @@ module TableauServerClient
     class Workbook < Resource
       include Downloadable
 
-      attr_reader :id, :name, :content_url, :show_tabs, :size, :created_at, :updated_at
+      attr_reader :id, :name, :webpage_url, :content_url, :show_tabs, :size, :created_at, :updated_at
       attr_writer :owner
 
       def self.from_response(client, path, xml)
