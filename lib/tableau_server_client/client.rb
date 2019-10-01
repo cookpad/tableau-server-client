@@ -65,6 +65,15 @@ module TableauServerClient
       return response
     end
 
+    def download_image(resource_location, file_path: nil)
+      req_url = request_url("#{resource_location.path}/image", resource_location.query_params)
+      response = session.get req_url.to_s
+      if file_path
+        File.write(file_path, response.body)
+      end
+      return response
+    end
+
     def update(resource)
       session.put do |req|
         req.url request_url(resource.path).to_s

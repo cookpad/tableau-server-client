@@ -4,6 +4,7 @@ require 'tableau_server_client/resources/workbook'
 require 'tableau_server_client/resources/user'
 require 'tableau_server_client/resources/subscription'
 require 'tableau_server_client/resources/extract_refresh'
+require 'tableau_server_client/resources/view'
 
 module TableauServerClient
   module Resources
@@ -38,6 +39,10 @@ module TableauServerClient
 
       def workbook(id)
         @client.get Workbook.location(path, id)
+      end
+
+      def views(filter: [])
+        @client.get_collection View.location(path, filter: filter)
       end
 
       def users(filter: [])
