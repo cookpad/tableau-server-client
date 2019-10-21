@@ -7,13 +7,16 @@ require 'logger'
 module TableauServerClient
   class Server
 
+    #Implement for_token
+    #def for_token(token)
+
     def initialize(server_url, username, password,
-                   site_name: "default", api_version: "3.1", token_lifetime: 240,
+                   content_url: "", api_version: "3.1", token_lifetime: 240,
                    log_level: :info, impersonation_username: nil)
       @server_url = server_url
       @username = username
       @password = password
-      @site_name = site_name
+      @content_url = content_url
       @api_version = api_version
       @token_lifetime = token_lifetime
       @logger = ::Logger.new(STDOUT)
@@ -21,14 +24,20 @@ module TableauServerClient
       @impersonation_username = impersonation_username
     end
 
-    attr_reader :server_url, :username, :site_name, :api_version, :token_lifetime, :logger, :impersonation_username
+    attr_reader :server_url, :username, :content_url, :api_version, :token_lifetime, :logger, :impersonation_username
 
     def sites
-      client.get_collection Resources::Site.location(path)
+      client.get_collection(Resources::Site.location(path)).map {|s|
+        client_for_site(s.content_url).get_collection(Resources::Site.location(path)).select {|x| x.id == s.id }.first
+      }
     end
 
     def site(id)
-      client.get Resources::Site.location(path, id)
+      sites.select { |s| s.id == id }.first
+    end
+
+    def full_site(id)
+      client_for_site(client.get(Resources::Site.location(path, id)).content_url).get Resources::Site.location(path, id)
     end
 
     def schedules
@@ -39,27 +48,36 @@ module TableauServerClient
       nil
     end
 
-    def client
-      @client ||= Client.new(server_url, username, password, site_name, api_version, token_lifetime, @logger, user_id(impersonation_username))
-    end
-
     private
 
     attr_reader :password
 
-    def user_id(username)
-      return nil unless username
+    def client
+      @client ||= client_for_site(content_url)
+    end
+
+    def client_for_site(_content_url)
+      Client.new(server_url, username, password, _content_url, api_version, token_lifetime, @logger, impersonation_user_id)
+    end
+
+    def site_id
       admin_client.get_collection(Resources::Site.location(path)).each do |site|
-        user = site.users(filter: ["name:eq:#{username}"]).first
-        if user
-          return user.id
+        if site.content_url == content_url
+          return site.id
         end
       end
+    end
+
+    def impersonation_user_id
+      return @impersonation_user_id if @impersonation_user_id
+      return nil unless impersonation_username
+      user = admin_client.get(Resources::Site.location(path, site_id)).users(filter: ["name:eq:#{impersonation_username}"]).first
+      return @impersonation_user_id = user.id if user
       raise TableauServerClientError.new("User '#{username}' not found.")
     end
 
     def admin_client
-      @admin_client ||= Client.new(server_url, username, password, site_name, api_version, token_lifetime, @logger, nil)
+      @admin_client ||= Client.new(server_url, username, password, content_url, api_version, token_lifetime, @logger, nil)
     end
 
   end

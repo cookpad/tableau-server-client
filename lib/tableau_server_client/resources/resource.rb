@@ -61,6 +61,14 @@ module TableauServerClient
         self.class.extract_site_path(path)
       end
 
+      def site_id
+        site_path.split('/')[1]
+      end
+
+      def server_url
+        @client.server_url
+      end
+
       def delete!
         @client.delete self
       end

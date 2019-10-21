@@ -3,6 +3,7 @@ require 'tableau_server_client/resources/project'
 require 'tableau_server_client/resources/connection'
 require 'tableau_server_client/resources/downloadable'
 require 'tableau_server_client/resources/datasource'
+require 'tableau_server_client/resources/view'
 
 module TableauServerClient
   module Resources
@@ -10,7 +11,7 @@ module TableauServerClient
     class Workbook < Resource
       include Downloadable
 
-      attr_reader :id, :name, :webpage_url, :content_url, :show_tabs, :size, :created_at, :updated_at
+      attr_reader :id, :name, :webpage_url, :content_url, :show_tabs, :size, :created_at, :updated_at, :project_id, :owner_id
       attr_writer :owner
 
       def self.from_response(client, path, xml)
@@ -32,11 +33,15 @@ module TableauServerClient
       end
 
       def project
-        @project ||= @client.get_collection(Project.location(site_path)).find {|p| p.id == @project_id }
+        @project ||= @client.get_collection(Project.location(site_path)).find {|p| p.id == project_id }
       end
 
       def owner
         @owner ||= @client.get User.location(site_path, @owner_id)
+      end
+
+      def views
+        @views ||= @client.get_collection(View.location(site_path)).select {|v| v.workbook_id == id }
       end
 
       def to_request

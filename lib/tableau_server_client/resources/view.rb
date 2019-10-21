@@ -27,8 +27,11 @@ module TableauServerClient
       end
 
       def webpage_url
-        webpage_path = content_url.gsub('/sheets/', '/')
         "#{server_url}#{content}/#/views/#{webpage_path}"
+      end
+
+      def webpage_path
+        content_url.gsub('/sheets/', '/')
       end
 
       def image(query_params: {}, file_path: nil)

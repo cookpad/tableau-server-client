@@ -14,18 +14,18 @@ module TableauServerClient
   class Client
     include RequestBuilder
 
-    def initialize(server_url, username, password, site_name, api_version, token_lifetime, logger, impersonation_user_id)
+    def initialize(server_url, username, password, content_url, api_version, token_lifetime, logger, impersonation_user_id)
       @server_url = server_url
       @username = username
       @password = password
-      @site_name = site_name
+      @content_url = content_url
       @api_version = api_version
       @token_lifetime = token_lifetime
       @logger = logger
       @impersonation_user_id = impersonation_user_id
     end
 
-    attr_reader :site_name, :username, :api_version, :token_lifetime, :logger, :impersonation_user_id
+    attr_reader :content_url, :username, :api_version, :token_lifetime, :logger, :impersonation_user_id
 
     def server_url
       @_server_url ||= URI(@server_url.chomp("/"))
@@ -72,7 +72,7 @@ module TableauServerClient
       if file_path
         File.write(file_path, response.body)
       end
-      return response
+      return response.body
     end
 
     def update(resource)
@@ -123,10 +123,6 @@ module TableauServerClient
         req.body = request
       end
       @token = TableauServerClient::Token.parse(res.body, token_lifetime)
-    end
-
-    def content_url
-      site_name == 'default' ? "" : site_name
     end
 
     def faraday

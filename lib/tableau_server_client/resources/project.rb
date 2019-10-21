@@ -1,4 +1,5 @@
 require 'tableau_server_client/resources/resource'
+require 'tableau_server_client/resources/workbook'
 
 module TableauServerClient
   module Resources
@@ -57,6 +58,12 @@ module TableauServerClient
 
       def hierarchy
         @hierarchy ||= (parent_projects << self).map {|p| p.name }.join('/')
+      end
+
+      def workbooks
+        @client.get_collection(Workbook.location(site_path, filter: [])).select {|w|
+          w.project_id == id
+        }
       end
 
       def extract_values_in_description

@@ -45,6 +45,10 @@ module TableauServerClient
         @client.get_collection View.location(path, filter: filter)
       end
 
+      def view(id)
+        @client.get View.location(path, id)
+      end
+
       def users(filter: [])
         @client.get_collection User.location(path, filter: filter)
       end
