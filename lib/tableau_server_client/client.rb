@@ -75,15 +75,18 @@ module TableauServerClient
       return response.body
     end
 
-    def update(resource)
+    def update(resource, path: nil, request: nil)
+      path = path || resource.path
+      request = request || resource.to_request
       session.put do |req|
-        req.url request_url(resource.path).to_s
-        req.body = resource.to_request
+        req.url request_url(path).to_s
+        req.body = request
       end
     end
 
-    def delete(resource)
-      session.delete request_url(resource.path).to_s
+    def delete(resource, path: nil)
+      path = path || resource.path
+      session.delete request_url(path).to_s
     end
 
     def session

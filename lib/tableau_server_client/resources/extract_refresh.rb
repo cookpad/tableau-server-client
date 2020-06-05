@@ -58,6 +58,10 @@ module TableauServerClient
         Job.from_response(@client, Job.location(site_path, id = job_id).path, resp)
       end
 
+      def delete!
+        resp = @client.delete(self)
+      end
+
     end
   end
 end

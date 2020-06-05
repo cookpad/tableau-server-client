@@ -11,13 +11,14 @@ module TableauServerClient
     class Workbook < Resource
       include Downloadable
 
-      attr_reader :id, :name, :webpage_url, :content_url, :show_tabs, :size, :created_at, :updated_at, :project_id, :owner_id
+      attr_reader :id, :name, :webpage_url, :content_url, :show_tabs, :size, :created_at, :updated_at, :project_id, :owner_id, :tags
       attr_writer :owner
 
       def self.from_response(client, path, xml)
         attrs = extract_attributes(xml)
         attrs['project_id'] = xml.xpath("xmlns:project")[0]['id']
-        attrs['owner_id']   = xml.xpath("xmlns:owner")[0]['id']
+        attrs['owner_id'] = xml.xpath("xmlns:owner")[0]['id']
+        attrs['tags'] = xml.xpath("xmlns:tags/xmlns:tag").map {|t| t['label'] }
         new(client, path, attrs)
       end
 
@@ -55,6 +56,21 @@ module TableauServerClient
 
       def update!
         @client.update self
+      end
+
+      def add_tags!(tags)
+        request = build_request {|b|
+          b.tags {
+            tags.each do |t|
+              b.tag(label: t)
+            end
+          }
+        }
+        resp = @client.update(self, path: "#{path}/tags", request: request)
+      end
+
+      def delete_tag!(tag)
+        @client.delete(self, path: "#{path}/tags/#{tag}")
       end
 
       def embedded_datasources
