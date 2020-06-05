@@ -36,6 +36,10 @@ module TableauServerClient
       sites.select { |s| s.id == id }.first
     end
 
+    def site_by_name(site_name)
+      sites.select { |s| s.name == site_name }.first
+    end
+
     def full_site(id)
       client_for_site(client.get(Resources::Site.location(path, id)).content_url).get Resources::Site.location(path, id)
     end
