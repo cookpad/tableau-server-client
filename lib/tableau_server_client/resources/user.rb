@@ -20,7 +20,7 @@ module TableauServerClient
       end
 
       def reload
-        @client.get User.location(site_path, id)
+        @client.get location
       end
 
       def full_name
@@ -37,6 +37,23 @@ module TableauServerClient
         @client.get_collection(Datasource.location(site_path, filter: ["ownerName:eq:#{full_name}"])).select do |d|
           d.owner.id == id
         end
+      end
+
+      def to_request
+        request = build_request {|b|
+          b.user(siteRole: site_role)
+        }
+      end
+
+      def update_site_role!(role)
+        @site_role = role
+        # Using location to get corretct path
+        # When initialized from Group path will be groups/group_id/users/user_id
+        @client.update(self, path: location.path)
+      end
+
+      def location
+        User.location(site_path, id)
       end
 
     end

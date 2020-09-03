@@ -5,6 +5,7 @@ require 'tableau_server_client/resources/user'
 require 'tableau_server_client/resources/subscription'
 require 'tableau_server_client/resources/extract_refresh'
 require 'tableau_server_client/resources/view'
+require 'tableau_server_client/resources/group'
 
 module TableauServerClient
   module Resources
@@ -76,6 +77,11 @@ module TableauServerClient
       def extract_refreshes
         @client.get_collection ExtractRefresh.location("#{path}/tasks")
       end
+
+      def groups(filter: [])
+        @client.get_collection Group.location(path, filter: filter)
+      end
+
 
     end
   end
