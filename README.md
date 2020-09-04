@@ -11,3 +11,9 @@ $ bundle exec console
 > site.workbooks.first.name
 => "My Workbook"
 ```
+
+## Release new version
+
+```
+$ rake release
+```
