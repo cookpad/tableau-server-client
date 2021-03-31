@@ -23,7 +23,7 @@ module TableauServerClient
 
     def query_params
       return "" if params.empty?
-      params.keys.map {|k| URI.encode("#{k}=#{params[k]}") }.join("&")
+      params.keys.map {|k| URI.encode_www_form({k => params[k]}) }.join("&")
     end
   end
 end
