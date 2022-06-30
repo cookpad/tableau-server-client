@@ -16,7 +16,7 @@ module TableauServerClient
 
       def self.from_response(client, path, xml)
         attrs = extract_attributes(xml)
-        attrs['project_id'] = xml.xpath("xmlns:project")[0]['id']
+        attrs['project_id'] = xml.at_xpath("xmlns:project")&.[]('id')
         attrs['owner_id'] = xml.xpath("xmlns:owner")[0]['id']
         attrs['tags'] = xml.xpath("xmlns:tags/xmlns:tag").map {|t| t['label'] }
         new(client, path, attrs)
