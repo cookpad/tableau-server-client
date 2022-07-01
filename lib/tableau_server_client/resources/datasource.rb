@@ -9,7 +9,7 @@ module TableauServerClient
     class Datasource < Resource
       include Downloadable
 
-      attr_reader :id, :name, :webpage_url, :content_url, :type, :created_at, :updated_at, :is_certified
+      attr_reader :id, :name, :webpage_url, :content_url, :type, :created_at, :updated_at, :is_certified, :project_id, :owner_id
       attr_writer :owner
 
       def self.from_response(client, path, xml)
