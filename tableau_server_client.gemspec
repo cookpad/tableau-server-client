@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
 
   spec.summary       = %q{Tableau Server REST API Client}
   spec.description   = %q{REST API Client for Tableau Server.}
-  spec.homepage      = "https://github.com/shimpeko/tableau-server-client"
+  spec.homepage      = "https://github.com/cookpad/tableau-server-client"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0").reject do |f|
