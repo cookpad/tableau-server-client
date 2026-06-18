@@ -153,6 +153,7 @@ module TableauServerClient
       end
 
       def decode(str)
+        return {} if str.nil? || str.empty?
         str.split('&').map {|p| p.split('=') }.to_h
       end
     end
