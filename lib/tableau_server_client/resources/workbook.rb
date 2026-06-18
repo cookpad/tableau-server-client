@@ -42,7 +42,7 @@ module TableauServerClient
       end
 
       def views
-        @views ||= @client.get_collection(View.location(site_path)).select {|v| v.workbook_id == id }
+        @views ||= @client.get_collection(View.location(path))
       end
 
       def to_request
