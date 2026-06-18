@@ -12,11 +12,10 @@ module TableauServerClient
           when 'application/xml'
             return @content_body = Nokogiri::XML(response.body)
           when 'application/octet-stream'
-            Zip::InputStream.open(StringIO.new(response.body)) do |io|
-              while entry = io.get_next_entry
-                return @content_body = Nokogiri::XML(io.read) if entry.name =~ /.*\.(tds|twb)/
-              end
-              raise "TDS or TWB file not found for: #{location.path}"
+            Zip::File.open_buffer(StringIO.new(response.body)) do |zip|
+              entry = zip.find { |e| e.name =~ /.*\.(tds|twb)/ }
+              raise "TDS or TWB file not found for: #{location.path}" unless entry
+              return @content_body = Nokogiri::XML(entry.get_input_stream.read)
             end
           else
             raise "Unknown content-type: #{content_type}"
