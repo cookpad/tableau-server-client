@@ -133,14 +133,7 @@ module TableauServerClient
           max: 4,
           interval: 0.5,
           backoff_factor: 2,
-          retry_statuses: [429, 500, 502, 503, 504],
-          exceptions: [
-            Faraday::ConnectionFailed,
-            Faraday::TimeoutError,
-            Errno::ETIMEDOUT,
-            Timeout::Error,
-          ],
-          methods: %i[get]
+          retry_statuses: [429, 500, 502, 503, 504]
         f.response :raise_error
         f.response :logger, logger
         f.adapter Faraday.default_adapter
