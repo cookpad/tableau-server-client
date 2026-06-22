@@ -12,8 +12,10 @@ module TableauServerClient
       def self.from_response(client, path, xml)
         attrs = extract_attributes(xml)
         # The workbook-scoped views endpoint (/workbooks/<id>/views) omits the
-        # <workbook> element since it is already implied, so guard against nil.
-        attrs['workbook_id'] = xml.xpath("xmlns:workbook")[0]&.[]('id')
+        # <workbook> element since it is already implied, so fall back to parsing
+        # the workbook id from the request path when the element is absent.
+        workbook_node = xml.at_xpath("xmlns:workbook")
+        attrs['workbook_id'] = workbook_node&.[]('id') || path[%r{/workbooks/([^/]+)/views}, 1]
         new(client, path, attrs)
       end
 
