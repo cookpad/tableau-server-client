@@ -61,7 +61,7 @@ module TableauServerClient
       end
 
       def workbooks
-        @client.get_collection(Workbook.location(site_path, filter: [])).select {|w|
+        @client.get_collection(Workbook.location(site_path, filter: ["projectName:eq:#{name}"])).select {|w|
           w.project_id == id
         }
       end

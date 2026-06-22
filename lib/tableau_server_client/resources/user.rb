@@ -29,13 +29,13 @@ module TableauServerClient
 
       def workbooks
         @client.get_collection(Workbook.location(site_path, filter: ["ownerName:eq:#{full_name}"])).select do |w|
-          w.owner.id == id
+          w.owner_id == id
         end
       end
 
       def datasources
         @client.get_collection(Datasource.location(site_path, filter: ["ownerName:eq:#{full_name}"])).select do |d|
-          d.owner.id == id
+          d.owner_id == id
         end
       end
 
