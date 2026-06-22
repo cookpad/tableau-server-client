@@ -42,7 +42,7 @@ module TableauServerClient
       end
 
       def views
-        @views ||= @client.get_collection(View.location(path))
+        @views ||= @client.get_collection(View.location(path)).to_a
       end
 
       def to_request
