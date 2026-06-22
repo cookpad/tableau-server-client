@@ -1,8 +1,10 @@
 require 'uri'
 require 'faraday'
+require 'faraday/retry'
 require 'nokogiri'
 require 'tableau_server_client/request_url'
 require 'tableau_server_client/request_builder'
+require 'tableau_server_client/credentials'
 require 'tableau_server_client/token'
 require 'tableau_server_client/paginatable_response'
 require 'tempfile'
@@ -14,10 +16,9 @@ module TableauServerClient
   class Client
     include RequestBuilder
 
-    def initialize(server_url, username, password, content_url, api_version, token_lifetime, logger, impersonation_user_id)
+    def initialize(server_url, credentials, content_url, api_version, token_lifetime, logger, impersonation_user_id)
       @server_url = server_url
-      @username = username
-      @password = password
+      @credentials = credentials
       @content_url = content_url
       @api_version = api_version
       @token_lifetime = token_lifetime
@@ -25,7 +26,7 @@ module TableauServerClient
       @impersonation_user_id = impersonation_user_id
     end
 
-    attr_reader :content_url, :username, :api_version, :token_lifetime, :logger, :impersonation_user_id
+    attr_reader :content_url, :api_version, :token_lifetime, :logger, :impersonation_user_id
 
     def server_url
       @_server_url ||= URI(@server_url.chomp("/"))
@@ -103,8 +104,6 @@ module TableauServerClient
 
     private
 
-    attr_reader :password
-
     def request_url(path, query_params={})
       RequestUrl.new(server_url, api_version, path, query_params)
     end
@@ -115,7 +114,7 @@ module TableauServerClient
 
     def signin
       request = request_body {|b|
-        b.credentials(name: username, password: password) {
+        b.credentials(@credentials.signin_attributes) {
           b.site(contentUrl: content_url)
           b.user(id: impersonation_user_id) if impersonation_user_id
         }
@@ -130,6 +129,11 @@ module TableauServerClient
 
     def faraday
       @faraday ||= Faraday.new(request: {params_encoder: EmptyEncoder.new}, headers: {'Content-Type' => 'application/xml'}) do |f|
+        f.request :retry,
+          max: 4,
+          interval: 0.5,
+          backoff_factor: 2,
+          retry_statuses: [429, 500, 502, 503, 504]
         f.response :raise_error
         f.response :logger, logger
         f.adapter Faraday.default_adapter
@@ -142,6 +146,7 @@ module TableauServerClient
       end
 
       def decode(str)
+        return {} if str.nil? || str.empty?
         str.split('&').map {|p| p.split('=') }.to_h
       end
     end

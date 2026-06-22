@@ -11,7 +11,9 @@ module TableauServerClient
 
       def self.from_response(client, path, xml)
         attrs = extract_attributes(xml)
-        attrs['schedule_id'] = xml.xpath("xmlns:schedule/@id").first.value
+        # Tableau Server returns <schedule id="..."> but Tableau Cloud returns
+        # an inline schedule (frequency/nextRunAt) with no id, so guard against nil.
+        attrs['schedule_id'] = xml.xpath("xmlns:schedule/@id").first&.value
         attrs['workbook_id'] = xml.xpath("xmlns:workbook/@id").first&.value
         attrs['datasource_id'] = xml.xpath("xmlns:datasource/@id").first&.value
         new(client, path, attrs)
